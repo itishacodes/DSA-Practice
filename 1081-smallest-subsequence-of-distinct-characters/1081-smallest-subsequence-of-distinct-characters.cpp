@@ -1,39 +1,35 @@
-#include <iostream>
 #include <string>
 #include <vector>
-#include <unordered_map>
 
 class Solution {
 public:
     std::string smallestSubsequence(std::string s) {
-        std::vector<int> last_occurrence(26, 0);
-        std::vector<bool> visited(26, false);
+        std::vector<int> last_index(26, 0);
+        std::vector<bool> in_stack(26, false);
         
-        // Step 1: Record the last position of each character
+        // Step 1: Record the last occurrence index for each character
         for (int i = 0; i < s.length(); ++i) {
-            last_occurrence[s[i] - 'a'] = i;
+            last_index[s[i] - 'a'] = i;
         }
         
-        std::string result = "";
+        std::string result = ""; // Used as a stack
         
-        // Step 2: Build the result using a stack-like approach
+        // Step 2: Iterate through the string
         for (int i = 0; i < s.length(); ++i) {
-            int char_idx = s[i] - 'a';
+            char c = s[i];
             
-            // If already in the result, skip
-            if (visited[char_idx]) continue;
+            // If character is already included in our result, skip it
+            if (in_stack[c - 'a']) continue;
             
-            // While stack is not empty AND
-            // current char is smaller than top of stack AND
-            // the top character appears later in the string
-            while (!result.empty() && s[i] < result.back() && i < last_occurrence[result.back() - 'a']) {
-                visited[result.back() - 'a'] = false;
+            // Maintain monotonic property: pop larger characters that appear again later
+            while (!result.empty() && result.back() > c && last_index[result.back() - 'a'] > i) {
+                in_stack[result.back() - 'a'] = false;
                 result.pop_back();
             }
             
-            // Add current character
-            result.push_back(s[i]);
-            visited[char_idx] = true;
+            // Append current character
+            result.push_back(c);
+            in_stack[c - 'a'] = true;
         }
         
         return result;
